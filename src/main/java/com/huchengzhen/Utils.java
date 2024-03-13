@@ -50,10 +50,12 @@ public class Utils {
     Vector3 point = Vector3.add(origin, Vector3.multiply(closestT, direction));
     Vector3 normal = Vector3.subtract(point, closestSphere.getCenter());
     normal = Vector3.multiply(1.0 / Vector3.length(normal), normal);
+    Vector3 view = Vector3.multiply(-1, direction);
     Vector3 colorv =
         Vector3.clamp(
             Vector3.multiply(
-                computeLighting(point, normal), Vector3.fromColor(closestSphere.getColor())));
+                computeLighting(point, normal, view, closestSphere.getSpecular()),
+                Vector3.fromColor(closestSphere.getColor())));
     return new Color((int) colorv.getX(), (int) colorv.getY(), (int) colorv.getZ());
   }
 
@@ -63,7 +65,8 @@ public class Utils {
     image.setRGB(x, y, color.getRGB());
   }
 
-  public static double computeLighting(Vector3 point, Vector3 normal) {
+  public static double computeLighting(
+      Vector3 point, Vector3 normal, Vector3 view, double specular) {
     double intensity = 0;
     double length_n = Vector3.length(normal);
     for (Light light : Main.lights) {
@@ -79,6 +82,18 @@ public class Utils {
         double n_dot_l = Vector3.dotProduct(normal, vec_l);
         if (n_dot_l > 0) {
           intensity += light.getIntensity() * n_dot_l / (length_n * Vector3.length(vec_l));
+        }
+
+        if (specular != -1) {
+          Vector3 r =
+              Vector3.subtract(
+                  Vector3.multiply(2.0 * Vector3.dotProduct(normal, vec_l), normal), vec_l);
+          double dotV = Vector3.dotProduct(r, view);
+          if (dotV > 0) {
+            intensity +=
+                light.getIntensity()
+                    * Math.pow(dotV / Vector3.length(r) / Vector3.length(view), specular);
+          }
         }
       }
     }

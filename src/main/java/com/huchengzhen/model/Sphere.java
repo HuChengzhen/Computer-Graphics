@@ -9,10 +9,21 @@ public class Sphere {
 
   private Color color;
 
-  public Sphere(Vector3 center, double radius, Color color) {
+  private double specular;
+
+  public Sphere(Vector3 center, double radius, Color color, double specular) {
     this.center = center;
     this.radius = radius;
     this.color = color;
+    this.specular = specular;
+  }
+
+  public double getSpecular() {
+    return specular;
+  }
+
+  public void setSpecular(double specular) {
+    this.specular = specular;
   }
 
   public Vector3 getCenter() {
